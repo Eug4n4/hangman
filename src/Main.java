@@ -119,14 +119,18 @@ public class Main {
         }
     }
 
+    public static boolean isCyrillicLetter(char letter) {
+        return String.valueOf(letter).toLowerCase().matches("[а-я]");
+    }
+
     public static char getInputLetter() {
-        String input;
+        char[] input;
 
         do {
             System.out.println("Введите букву:");
-            input = scanner.nextLine().toLowerCase();
-        } while (input.length() != 1);
-        return input.toCharArray()[0];
+            input = scanner.nextLine().toLowerCase().toCharArray();
+        } while (input.length != 1 || !isCyrillicLetter(input[0]));
+        return input[0];
     }
 
     public static void printHangman(int mistakes) {
@@ -193,7 +197,6 @@ public class Main {
 
             if (!usedChars.contains(guessedLetter)) {
                 openLetter(word, mask, guessedLetter, usedChars);
-
                 if (word.chars().noneMatch(ch -> ch == guessedLetter)) {
                     ++mistakes;
                 }
