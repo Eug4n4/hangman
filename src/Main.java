@@ -130,34 +130,10 @@ public class Main {
     }
 
     public static void printHangman(int mistakes) {
-        switch (mistakes) {
-            case 0:
-                System.out.println(hangman[0]);
-                break;
-
-            case 1:
-                System.out.println(hangman[1]);
-                break;
-
-            case 2:
-                System.out.println(hangman[2]);
-                break;
-
-            case 3:
-                System.out.println(hangman[3]);
-                break;
-
-            case 4:
-                System.out.println(hangman[4]);
-                break;
-
-            case 5:
-                System.out.println(hangman[5]);
-                break;
-            case 6:
-                System.out.println(hangman[6]);
-                break;
-
+        if (mistakes > hangman.length - 1) {
+            System.out.println(hangman[hangman.length - 1]);
+        } else {
+            System.out.println(hangman[mistakes]);
         }
     }
 
@@ -215,11 +191,14 @@ public class Main {
             printMaskedWord(mask);
             char guessedLetter = getInputLetter();
 
-            openLetter(word, mask, guessedLetter, usedChars);
+            if (!usedChars.contains(guessedLetter)) {
+                openLetter(word, mask, guessedLetter, usedChars);
 
-            if (word.chars().noneMatch(ch -> ch == guessedLetter)) {
-                ++mistakes;
+                if (word.chars().noneMatch(ch -> ch == guessedLetter)) {
+                    ++mistakes;
+                }
             }
+
             printHangman(mistakes);
             System.out.println("Использованные буквы: " + usedChars);
         }
