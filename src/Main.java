@@ -1,13 +1,15 @@
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 
 public class Main {
     private static final String FILENAME = "nouns.txt";
-    private static final int MAX_LINES = 27359;
+    private static final String STOP_GAME_ANSWER = "Н";
+    private static final String START_GAME_ANSWER = "Д";
+    private static final int LETTERS_TO_OPEN = 2;
+    private static final char MASK_SYMBOL = '_';
+    private static final int MAX_LINES = 27_360;
     private static final int MAX_MISTAKES = 6;
     private static final String[] hangman = new String[]{
             """
@@ -18,7 +20,7 @@ public class Main {
             |
             |
             |
-            ======================""",
+            ===============""",
             """
             |---------|
             |         0
@@ -27,7 +29,7 @@ public class Main {
             |
             |
             |
-            ======================""",
+            ===============""",
             """
             |---------|
             |         0
@@ -36,7 +38,7 @@ public class Main {
             |
             |
             |
-            ======================""",
+            ===============""",
             """
             |---------|
             |         0
@@ -45,7 +47,7 @@ public class Main {
             |
             |
             |
-            ======================""",
+            ===============""",
             """
             |---------|
             |         0
@@ -54,7 +56,7 @@ public class Main {
             |
             |
             |
-            ======================""",
+            ===============""",
             """
             |---------|
             |         0
@@ -64,7 +66,7 @@ public class Main {
             |
             |
             |
-            ======================""",
+            ===============""",
             """
             |---------|
             |         0
@@ -74,15 +76,22 @@ public class Main {
             |
             |
             |
-            ======================"""
+            ==============="""
 
     };
     private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
 
+    public static boolean isWordGuessed(String word, char[] mask) {
+        return Arrays.equals(word.toCharArray(), mask);
+    }
+
+    public static boolean isGameOver(String word, char[] mask, int mistakes) {
+        return isWordGuessed(word, mask) || mistakes == MAX_MISTAKES;
+    }
 
     public static boolean isGameStartAnswerValid(String answer) {
-        return Objects.equals(answer, "Д") || Objects.equals(answer, "Н");
+        return Objects.equals(answer, START_GAME_ANSWER.toLowerCase()) || Objects.equals(answer, STOP_GAME_ANSWER.toLowerCase());
     }
 
     public static boolean shouldGameStart() {
@@ -90,14 +99,14 @@ public class Main {
 
         do {
             System.out.println("Хотите сыграть в виселицу?");
-            System.out.println("Введите Д чтобы начать игру, Н чтобы выйти");
-            answer = scanner.nextLine();
+            System.out.println("Введите " + START_GAME_ANSWER + " чтобы начать игру, " +
+                    STOP_GAME_ANSWER + " чтобы выйти");
+            answer = scanner.nextLine().toLowerCase();
         } while (!isGameStartAnswerValid(answer));
 
 
-        return Objects.equals(answer, "Д");
+        return Objects.equals(answer, START_GAME_ANSWER.toLowerCase());
     }
-
 
     public static String readRandomWord() throws FileNotFoundException {
         int lineNumber = random.nextInt(MAX_LINES);
@@ -115,39 +124,9 @@ public class Main {
 
         do {
             System.out.println("Введите букву:");
-            input = scanner.nextLine();
-        } while (input.length() > 1);
+            input = scanner.nextLine().toLowerCase();
+        } while (input.length() != 1);
         return input.toCharArray()[0];
-    }
-
-    public static void printMaskedWord(char[] mask) {
-        for (int i = 0; i < mask.length; i++) {
-            System.out.print(mask[i]);
-            if (i != mask.length - 1) {
-                System.out.print(" ");
-            }
-        }
-        System.out.println();
-
-    }
-
-    public static void openRandomLetters(String word, char[] mask) {
-
-        int c = 2;
-        while (c != 0) {
-            int index = random.nextInt(mask.length);
-
-            if (mask[index] != '_') {
-                continue;
-            }
-            for (int i = 0; i < word.length(); i++) {
-                if (Objects.equals(word.charAt(i), word.charAt(index))) {
-                    mask[i] = word.charAt(i);
-                }
-            }
-            c--;
-        }
-
     }
 
     public static void printHangman(int mistakes) {
@@ -182,33 +161,44 @@ public class Main {
         }
     }
 
-    public static void startGame() throws FileNotFoundException {
-        int mistakes = 0;
-        String word = readRandomWord();
-        Set<Character> usedChars = new HashSet<>();
-        char[] mask = word.toCharArray();
+    public static void printMaskedWord(char[] mask) {
+        for (int i = 0; i < mask.length; i++) {
+            System.out.print(mask[i]);
+            if (i != mask.length - 1) {
+                System.out.print(" ");
+            }
+        }
+        System.out.println();
 
-        Arrays.fill(mask, '_');
-        openRandomLetters(word, mask);
-        while (mistakes < MAX_MISTAKES) {
-            printMaskedWord(mask);
-            if (Arrays.equals(mask, word.toCharArray())) {
+    }
+
+    public static void openLetter(String word, char[] mask, char letter, Set<Character> usedChars) {
+        usedChars.add(letter);
+        for (int i = 0; i < word.length(); i++) {
+            if (word.charAt(i) == letter) {
+                mask[i] = letter;
+            }
+        }
+    }
+
+    public static void openRandomLetters(String word, char[] mask, int count, Set<Character> usedChars) {
+        while (count > 0) {
+            int index = random.nextInt(mask.length);
+
+            if (isWordGuessed(word, mask)) {
                 break;
             }
-            char guessedLetter = getInputLetter();
-            if (word.chars().anyMatch(c -> c == guessedLetter)) {
-                for (int i = 0; i < word.length(); i++) {
-                    if (Objects.equals(word.charAt(i), guessedLetter)) {
-                        mask[i] = word.charAt(i);
-                    }
-                }
-            } else {
-                ++mistakes;
+            if (mask[index] != MASK_SYMBOL) {
+                continue;
             }
-            usedChars.add(guessedLetter);
-            printHangman(mistakes);
-            System.out.println("Использованные буквы: " + usedChars);
+            openLetter(word, mask, word.charAt(index), usedChars);
+            count--;
         }
+
+    }
+
+    public static void printGameResult(String word, int mistakes) {
+        System.out.println();
         if (mistakes == MAX_MISTAKES) {
             System.out.println("Поражение");
         } else {
@@ -216,7 +206,35 @@ public class Main {
         }
         System.out.println("Слово было: " + word);
         System.out.println();
+    }
 
+    public static void doGame(String word, char[] mask, Set<Character> usedChars) {
+        int mistakes = 0;
+
+        while (!isGameOver(word, mask, mistakes)) {
+            printMaskedWord(mask);
+            char guessedLetter = getInputLetter();
+
+            openLetter(word, mask, guessedLetter, usedChars);
+
+            if (word.chars().noneMatch(ch -> ch == guessedLetter)) {
+                ++mistakes;
+            }
+            printHangman(mistakes);
+            System.out.println("Использованные буквы: " + usedChars);
+        }
+
+        printGameResult(word, mistakes);
+    }
+
+    public static void startGame() throws FileNotFoundException {
+        String word = readRandomWord();
+        Set<Character> usedChars = new HashSet<>();
+        char[] mask = word.toCharArray();
+
+        Arrays.fill(mask, MASK_SYMBOL);
+        openRandomLetters(word, mask, LETTERS_TO_OPEN, usedChars);
+        doGame(word, mask, usedChars);
     }
 
     public static void main(String[] args) {
