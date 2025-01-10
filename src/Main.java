@@ -9,7 +9,7 @@ public class Main {
     private static final String START_GAME_ANSWER = "Д";
     private static final int LETTERS_TO_OPEN = 2;
     private static final char MASK_SYMBOL = '_';
-    private static final int MAX_LINES = 27_360;
+    private static final int MAX_LINES = 21_271;
     private static final int MAX_MISTAKES = 6;
     private static final String[] hangman = new String[]{
             """
@@ -108,7 +108,7 @@ public class Main {
         return Objects.equals(answer, START_GAME_ANSWER.toLowerCase());
     }
 
-    public static String readRandomWord() throws FileNotFoundException {
+    public static String readRandomWord() throws FileNotFoundException, NoSuchElementException {
         int lineNumber = random.nextInt(MAX_LINES);
 
         try (Scanner scanner = new Scanner(new FileReader(FILENAME))) {
@@ -227,7 +227,7 @@ public class Main {
         printGameResult(word, mistakes);
     }
 
-    public static void startGame() throws FileNotFoundException {
+    public static void startGame() throws FileNotFoundException, NoSuchElementException {
         String word = readRandomWord();
         Set<Character> usedChars = new HashSet<>();
         char[] mask = word.toCharArray();
@@ -241,7 +241,7 @@ public class Main {
         while (shouldGameStart()) {
             try {
                 startGame();
-            } catch (FileNotFoundException exception) {
+            } catch (FileNotFoundException | NoSuchElementException exception) {
                 System.out.println(exception.getMessage());
                 break;
             }
