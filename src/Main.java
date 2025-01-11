@@ -119,7 +119,7 @@ public class Main {
     }
 
     private static boolean isCyrillicLetter(char letter) {
-        return String.valueOf(letter).toLowerCase().matches("[а-я]");
+        return Character.UnicodeBlock.of(letter) == Character.UnicodeBlock.CYRILLIC;
     }
 
     private static char getInputLetter() {
@@ -160,7 +160,9 @@ public class Main {
         }
     }
 
-    private static void openRandomLetters(String word, char[] mask, int count, Set<Character> usedChars) {
+    private static void openRandomLetters(String word, char[] mask, Set<Character> usedChars) {
+        int count = LETTERS_TO_OPEN;
+
         while (count > 0) {
             int index = random.nextInt(mask.length);
 
@@ -214,7 +216,7 @@ public class Main {
         char[] mask = word.toCharArray();
 
         Arrays.fill(mask, MASK_SYMBOL);
-        openRandomLetters(word, mask, LETTERS_TO_OPEN, usedChars);
+        openRandomLetters(word, mask, usedChars);
         doGame(word, mask, usedChars);
     }
 
