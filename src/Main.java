@@ -82,25 +82,24 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
 
-    public static boolean isWordGuessed(String word, char[] mask) {
+    private static boolean isWordGuessed(String word, char[] mask) {
         return Arrays.equals(word.toCharArray(), mask);
     }
 
-    public static boolean isGameOver(String word, char[] mask, int mistakes) {
+    private static boolean isGameOver(String word, char[] mask, int mistakes) {
         return isWordGuessed(word, mask) || mistakes == MAX_MISTAKES;
     }
 
-    public static boolean isGameStartAnswerValid(String answer) {
+    private static boolean isGameStartAnswerValid(String answer) {
         return Objects.equals(answer, START_GAME_ANSWER.toLowerCase()) || Objects.equals(answer, STOP_GAME_ANSWER.toLowerCase());
     }
 
-    public static boolean shouldGameStart() {
+    private static boolean shouldGameStart() {
         String answer;
 
         do {
             System.out.println("Хотите сыграть в виселицу?");
-            System.out.println("Введите " + START_GAME_ANSWER + " чтобы начать игру, " +
-                    STOP_GAME_ANSWER + " чтобы выйти");
+            System.out.printf("Введите %s чтобы начать игру, %s чтобы выйти\n", START_GAME_ANSWER, STOP_GAME_ANSWER);
             answer = scanner.nextLine().toLowerCase();
         } while (!isGameStartAnswerValid(answer));
 
@@ -108,7 +107,7 @@ public class Main {
         return Objects.equals(answer, START_GAME_ANSWER.toLowerCase());
     }
 
-    public static String readRandomWord() throws FileNotFoundException, NoSuchElementException {
+    private static String readRandomWord() throws FileNotFoundException, NoSuchElementException {
         int lineNumber = random.nextInt(MAX_LINES);
 
         try (Scanner scanner = new Scanner(new FileReader(FILENAME))) {
@@ -119,11 +118,11 @@ public class Main {
         }
     }
 
-    public static boolean isCyrillicLetter(char letter) {
+    private static boolean isCyrillicLetter(char letter) {
         return String.valueOf(letter).toLowerCase().matches("[а-я]");
     }
 
-    public static char getInputLetter() {
+    private static char getInputLetter() {
         char[] input;
 
         do {
@@ -133,7 +132,7 @@ public class Main {
         return input[0];
     }
 
-    public static void printHangman(int mistakes) {
+    private static void printHangman(int mistakes) {
         if (mistakes > hangman.length - 1) {
             System.out.println(hangman[hangman.length - 1]);
         } else {
@@ -141,7 +140,7 @@ public class Main {
         }
     }
 
-    public static void printMaskedWord(char[] mask) {
+    private static void printMaskedWord(char[] mask) {
         for (int i = 0; i < mask.length; i++) {
             System.out.print(mask[i]);
             if (i != mask.length - 1) {
@@ -152,7 +151,7 @@ public class Main {
 
     }
 
-    public static void openLetter(String word, char[] mask, char letter, Set<Character> usedChars) {
+    private static void openLetter(String word, char[] mask, char letter, Set<Character> usedChars) {
         usedChars.add(letter);
         for (int i = 0; i < word.length(); i++) {
             if (word.charAt(i) == letter) {
@@ -161,7 +160,7 @@ public class Main {
         }
     }
 
-    public static void openRandomLetters(String word, char[] mask, int count, Set<Character> usedChars) {
+    private static void openRandomLetters(String word, char[] mask, int count, Set<Character> usedChars) {
         while (count > 0) {
             int index = random.nextInt(mask.length);
 
@@ -177,7 +176,7 @@ public class Main {
 
     }
 
-    public static void printGameResult(String word, int mistakes) {
+    private static void printGameResult(String word, int mistakes) {
         System.out.println();
         if (mistakes == MAX_MISTAKES) {
             System.out.println("Поражение");
@@ -188,7 +187,7 @@ public class Main {
         System.out.println();
     }
 
-    public static void doGame(String word, char[] mask, Set<Character> usedChars) {
+    private static void doGame(String word, char[] mask, Set<Character> usedChars) {
         int mistakes = 0;
 
         while (!isGameOver(word, mask, mistakes)) {
@@ -209,7 +208,7 @@ public class Main {
         printGameResult(word, mistakes);
     }
 
-    public static void startGame() throws FileNotFoundException, NoSuchElementException {
+    private static void startGame() throws FileNotFoundException, NoSuchElementException {
         String word = readRandomWord();
         Set<Character> usedChars = new HashSet<>();
         char[] mask = word.toCharArray();
